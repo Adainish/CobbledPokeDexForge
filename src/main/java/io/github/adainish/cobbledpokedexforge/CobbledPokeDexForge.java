@@ -1,6 +1,7 @@
 package io.github.adainish.cobbledpokedexforge;
 
 import io.github.adainish.cobbledpokedexforge.config.ConfigurableDexConfig;
+import io.github.adainish.cobbledpokedexforge.config.DexProgressionConfig;
 import io.github.adainish.cobbledpokedexforge.config.RewardsConfig;
 import io.github.adainish.cobbledpokedexforge.listener.PlayerListener;
 import io.github.adainish.cobbledpokedexforge.obj.ConfigurableDex;
@@ -49,6 +50,9 @@ public class CobbledPokeDexForge {
     public static ConfigurableDex configurableDex;
 
     public static RewardsConfig rewardsConfig;
+
+    public static DexProgressionConfig dexProgressionConfig;
+
     // Directly reference a slf4j logger
 
     public static Wrapper wrapper;
@@ -117,10 +121,13 @@ public class CobbledPokeDexForge {
         RewardsConfig.writeConfig();
         rewardsConfig = RewardsConfig.getConfig();
 
+        DexProgressionConfig.writeConfig();
+        dexProgressionConfig = DexProgressionConfig.getConfig();
+
+
         ConfigurableDexConfig.writeConfig();
         configurableDexConfig = ConfigurableDexConfig.getConfig();
         configurableDex = configurableDexConfig.configurableDex;
-        configurableDex.dexProgressionList.sort(Comparator.comparing(DexProgression::getPercentage).reversed());
     }
 
 

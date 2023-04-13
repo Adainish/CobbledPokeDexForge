@@ -4,6 +4,8 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/CobbledPokeDexForge.main.iml" filepath="$PROJECT_DIR$/.idea/modules/CobbledPokeDexForge.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/CobbledPokeDexForge.test.iml" filepath="$PROJECT_DIR$/.idea/modules/CobbledPokeDexForge.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/io.github.adainish.CobbledPokeDexForge.main.iml" filepath="$PROJECT_DIR$/.idea/modules/io.github.adainish.CobbledPokeDexForge.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/io.github.adainish.CobbledPokeDexForge.test.iml" filepath="$PROJECT_DIR$/.idea/modules/io.github.adainish.CobbledPokeDexForge.test.iml" />
     </modules>
   </component>
 </project>

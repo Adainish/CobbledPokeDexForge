@@ -3,34 +3,29 @@ package io.github.adainish.cobbledpokedexforge.config;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import io.github.adainish.cobbledpokedexforge.CobbledPokeDexForge;
-import io.github.adainish.cobbledpokedexforge.obj.ConfigurableDex;
+import io.github.adainish.cobbledpokedexforge.obj.ConfigurableDexProgression;
 import io.github.adainish.cobbledpokedexforge.util.Adapters;
 
 import java.io.*;
-
-public class ConfigurableDexConfig
+import java.util.HashMap;
+public class DexProgressionConfig
 {
-    public ConfigurableDex configurableDex;
-    public ConfigurableDexConfig()
+    public HashMap<String, ConfigurableDexProgression> configurableDexProgressions = new HashMap<>();
+
+    public DexProgressionConfig()
     {
-        this.configurableDex = new ConfigurableDex();
-        this.configurableDex.load();
+        this.configurableDexProgressions = new HashMap<>();
+        load();
     }
-
-    public static void save()
-    {
-
-    }
-
 
     public static void writeConfig()
     {
         File dir = CobbledPokeDexForge.getConfigDir();
         dir.mkdirs();
         Gson gson  = Adapters.PRETTY_MAIN_GSON;
-        ConfigurableDexConfig config = new ConfigurableDexConfig();
+        DexProgressionConfig config = new DexProgressionConfig();
         try {
-            File file = new File(dir, "config.json");
+            File file = new File(dir, "dexprogression.json");
             if (file.exists())
                 return;
             file.createNewFile();
@@ -44,12 +39,12 @@ public class ConfigurableDexConfig
         }
     }
 
-    public static ConfigurableDexConfig getConfig()
+    public static DexProgressionConfig getConfig()
     {
         File dir = CobbledPokeDexForge.getConfigDir();
         dir.mkdirs();
         Gson gson  = Adapters.PRETTY_MAIN_GSON;
-        File file = new File(dir, "config.json");
+        File file = new File(dir, "dexprogression.json");
         JsonReader reader = null;
         try {
             reader = new JsonReader(new FileReader(file));
@@ -58,7 +53,16 @@ public class ConfigurableDexConfig
             return null;
         }
 
-        return gson.fromJson(reader, ConfigurableDexConfig.class);
+        return gson.fromJson(reader, DexProgressionConfig.class);
     }
 
+    public void load()
+    {
+        for (int i = 0; i < 5; i++) {
+            ConfigurableDexProgression dexProgression = new ConfigurableDexProgression("example%i%".replace("%i%", String.valueOf(i + 1)));
+            dexProgression.setPercentage(20 * (i + 1));
+            dexProgression.setGuiSlot(9 + (2 * i));
+            configurableDexProgressions.put(dexProgression.getId(), dexProgression);
+        }
+    }
 }
