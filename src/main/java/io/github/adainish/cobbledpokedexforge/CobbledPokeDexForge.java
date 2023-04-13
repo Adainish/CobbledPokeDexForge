@@ -1,5 +1,6 @@
 package io.github.adainish.cobbledpokedexforge;
 
+import io.github.adainish.cobbledpokedexforge.cmd.Command;
 import io.github.adainish.cobbledpokedexforge.config.ConfigurableDexConfig;
 import io.github.adainish.cobbledpokedexforge.config.DexProgressionConfig;
 import io.github.adainish.cobbledpokedexforge.config.RewardsConfig;
@@ -10,6 +11,7 @@ import io.github.adainish.cobbledpokedexforge.subscriptions.EventSubscriptions;
 import io.github.adainish.cobbledpokedexforge.wrapper.Wrapper;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -92,6 +94,14 @@ public class CobbledPokeDexForge {
                 .replace("%y", YEAR)
         );
         initDirs();
+    }
+
+    @SubscribeEvent
+    public void onCommandRegistry(RegisterCommandsEvent event) {
+
+        //register commands
+        event.getDispatcher().register(Command.getCommand());
+
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call

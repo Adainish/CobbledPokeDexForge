@@ -11,6 +11,8 @@ import ca.landonjw.gooeylibs2.api.page.GooeyPage;
 import ca.landonjw.gooeylibs2.api.page.LinkedPage;
 import ca.landonjw.gooeylibs2.api.template.Template;
 import ca.landonjw.gooeylibs2.api.template.types.ChestTemplate;
+import com.cobblemon.mod.common.CobblemonItems;
+import com.cobblemon.mod.common.api.pokemon.evolution.Evolution;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import io.github.adainish.cobbledpokedexforge.CobbledPokeDexForge;
 import io.github.adainish.cobbledpokedexforge.util.Util;
@@ -47,6 +49,77 @@ public class PokeDex {
 
     public boolean completedPercent(DexProgression dexProgression) {
         return getCompletionPercentage(1) >= dexProgression.getPercentage();
+    }
+
+    public List<String> eggMoveList(Pokemon pokemon)
+    {
+        List<String> list = new ArrayList<>();
+
+        pokemon.getSpecies().getMoves().getEggMoves().forEach(moveTemplate -> list.add(moveTemplate.getName()));
+
+        return list;
+    }
+
+    public List<String> evoMoveList(Pokemon pokemon)
+    {
+        List<String> list = new ArrayList<>();
+
+        pokemon.getSpecies().getMoves().getEvolutionMoves().forEach(moveTemplate -> list.add(moveTemplate.getName()));
+
+        return list;
+    }
+
+    public List<String> levelUpMoveList(Pokemon pokemon)
+    {
+        List<String> list = new ArrayList<>();
+
+        pokemon.getSpecies().getMoves().getLevelUpMoves().forEach((integer, moveTemplates) -> moveTemplates.forEach(moveTemplate -> list.add("&7Lvl %lvl%: &e%move%"
+                        .replace("%lvl%", String.valueOf(integer))
+                .replace("%move%", moveTemplate.getName()))));
+
+        return list;
+    }
+
+    public List<String> evolutions(Pokemon pokemon)
+    {
+        List<String> list = new ArrayList<>();
+
+        for (Evolution evolution : pokemon.getEvolutions()) {
+            if (evolution.getResult().getSpecies() != null) {
+                list.add("&e%species%".replace("%species%", evolution.getResult().getSpecies()));
+            }
+        }
+
+        return list;
+    }
+
+    public List<String> spawnBiomes(Pokemon pokemon)
+    {
+        List<String> strings = new ArrayList<>();
+
+        return strings;
+    }
+
+
+    public List<String> tmList(Pokemon pokemon)
+    {
+        List<String> list = new ArrayList<>();
+
+        pokemon.getSpecies().getMoves().getTmMoves().forEach(moveTemplate -> list.add(moveTemplate.getName()));
+
+        return list;
+    }
+
+    public List<String> baseStats(Pokemon pokemon)
+    {
+        List<String> list = new ArrayList<>();
+
+        pokemon.getSpecies().getBaseStats().forEach((stat, integer) -> list.add("&b%stat% &e-> &7%integer%"
+                .replace("%stat%", stat.getDisplayName().getString())
+                .replace("%integer%", String.valueOf(integer))
+        ));
+
+        return list;
     }
 
     public List<String> abilityList(Pokemon pokemon) {
@@ -117,9 +190,7 @@ public class PokeDex {
 
         GooeyButton progressionView = GooeyButton.builder()
                 .title(Util.formattedString("&aPokeDex Progression"))
-                .onClick(b -> {
-                    UIManager.openUIForcefully(b.getPlayer(), progressionMainMenu());
-                })
+                .onClick(b -> UIManager.openUIForcefully(b.getPlayer(), progressionMainMenu()))
                 .display(new ItemStack(Items.ENCHANTED_BOOK)).build();
 
         PlaceholderButton placeHolderButton = new PlaceholderButton();
@@ -138,6 +209,57 @@ public class PokeDex {
     public GooeyPage pokemonPage(DexPokemon dexPokemon) {
         ChestTemplate.Builder templateBuilder = ChestTemplate.builder(6)
                 .border(0, 0, 6, 9, filler);
+
+        Pokemon pokemon = dexPokemon.getPokemon();
+        GooeyButton abilities = GooeyButton.builder()
+                .display(new ItemStack(CobblemonItems.CLOVER_SWEET.get()))
+                .title(Util.formattedString("&eAbilities:"))
+                .lore(Util.formattedArrayList(abilityList(pokemon)))
+                .build();
+
+        GooeyButton learnMoves = GooeyButton.builder()
+                .title(Util.formattedString("&dLevel Up Moves"))
+                .lore(Util.formattedArrayList(levelUpMoveList(pokemon)))
+                .display(new ItemStack(CobblemonItems.RARE_CANDY.get()))
+                .build();
+
+        GooeyButton tmMoves = GooeyButton.builder()
+                .title(Util.formattedString("&cTM Moves"))
+                .lore(Util.formattedArrayList(tmList(pokemon)))
+                .display(new ItemStack(CobblemonItems.MUSCLE_BAND.get()))
+                .build();
+
+        GooeyButton eggMoves = GooeyButton.builder()
+                .title(Util.formattedString("&bEgg Moves"))
+                .lore(Util.formattedArrayList(eggMoveList(pokemon)))
+                .display(new ItemStack(CobblemonItems.LUCKY_EGG.get()))
+                .build();
+
+        GooeyButton evoMoves = GooeyButton.builder()
+                .title(Util.formattedString("&cEvolution Moves"))
+                .lore(Util.formattedArrayList(evoMoveList(pokemon)))
+                .display(new ItemStack(CobblemonItems.MAGMARIZER.get()))
+                .build();
+
+        GooeyButton evolutions = GooeyButton.builder()
+                .title(Util.formattedString("&dEvolutions"))
+                .lore(Util.formattedArrayList(evolutions(pokemon)))
+                .display(new ItemStack(CobblemonItems.THUNDER_STONE.get()))
+                .build();
+
+        GooeyButton baseStats = GooeyButton.builder()
+                .title(Util.formattedString("&bBase Stats"))
+                .lore(baseStats(pokemon))
+                .display(new ItemStack(CobblemonItems.MYSTIC_WATER.get()))
+                .build();
+
+        templateBuilder.set(1, 1, abilities);
+        templateBuilder.set(1, 3, evolutions);
+        templateBuilder.set(1, 5, learnMoves);
+        templateBuilder.set(1, 7, tmMoves);
+        templateBuilder.set(2, 2, eggMoves);
+        templateBuilder.set(2, 4, evoMoves);
+        templateBuilder.set(2, 6, baseStats);
 
         return GooeyPage.builder().template(templateBuilder.build()).build();
     }
