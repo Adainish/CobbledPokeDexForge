@@ -32,7 +32,7 @@ public class PlayerListener
         if (event.getEntity() != null) {
             Player player = PlayerStorage.getPlayer(event.getEntity().getUUID());
             if (player != null) {
-                PlayerStorage.savePlayer(player);
+                player.save();
             }
         }
     }

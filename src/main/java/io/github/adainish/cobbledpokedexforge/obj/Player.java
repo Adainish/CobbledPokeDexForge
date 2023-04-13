@@ -27,6 +27,7 @@ public class Player
     {
         PlayerStorage.savePlayerNoCache(this);
     }
+
     public void save()
     {
         //save to storage file

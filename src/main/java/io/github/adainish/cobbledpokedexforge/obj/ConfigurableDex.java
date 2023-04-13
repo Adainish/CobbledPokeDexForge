@@ -13,12 +13,10 @@ public class ConfigurableDex
 {
     public HashMap<Integer, ConfigurableDexPokemon> pokemonData = new HashMap<>();
 
-    public List<DexProgression> dexProgressionList = new ArrayList<>();
 
     public ConfigurableDex()
     {
         this.pokemonData = new HashMap<>();
-        this.dexProgressionList = new ArrayList<>();
     }
 
     public void load()
@@ -27,12 +25,7 @@ public class ConfigurableDex
             ConfigurableDexPokemon dexPokemon = new ConfigurableDexPokemon(sp.getNationalPokedexNumber());
             pokemonData.put(sp.getNationalPokedexNumber(), dexPokemon);
         }
-        for (int i = 0; i < 5; i++) {
-            DexProgression dexProgression = new DexProgression("example%i%".replace("%i%", String.valueOf(i + 1)));
-            dexProgression.setPercentage(20 * (i + 1));
-            dexProgressionList.add(dexProgression);
-        }
-        dexProgressionList.sort(Comparator.comparing(DexProgression::getPercentage).reversed());
+
     }
 
     public void syncConfigData(Player player)

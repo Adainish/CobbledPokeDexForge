@@ -1,5 +1,8 @@
 package io.github.adainish.cobbledpokedexforge.obj;
 
+import io.github.adainish.cobbledpokedexforge.CobbledPokeDexForge;
+import io.github.adainish.cobbledpokedexforge.util.Util;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,19 +10,10 @@ public class DexProgression
 {
     private String id;
     private List<String> rewards = new ArrayList<>();
-    private double percentage = 0;
-    private String guiItem;
-    private String guiTitle;
-    private List<String> guiLore;
-
+    private boolean claimed = false;
     public DexProgression(String id)
     {
         this.setId(id);
-        this.setPercentage(0);
-        this.setGuiItem("minecraft:paper");
-        this.setGuiTitle("&bDex Progression");
-        this.setGuiLore(new ArrayList<>());
-        this.setRewards(new ArrayList<>());
     }
 
 
@@ -32,42 +26,47 @@ public class DexProgression
     }
 
     public List<String> getRewards() {
-        return rewards;
-    }
-
-    public void setRewards(List<String> rewards) {
-        this.rewards = rewards;
+        return CobbledPokeDexForge.dexProgressionConfig.configurableDexProgressions.get(id).getRewards();
     }
 
     public double getPercentage() {
-        return percentage;
-    }
-
-    public void setPercentage(double percentage) {
-        this.percentage = percentage;
+        return CobbledPokeDexForge.dexProgressionConfig.configurableDexProgressions.get(id).getPercentage();
     }
 
     public String getGuiItem() {
-        return guiItem;
-    }
-
-    public void setGuiItem(String guiItem) {
-        this.guiItem = guiItem;
+        return CobbledPokeDexForge.dexProgressionConfig.configurableDexProgressions.get(id).getGuiItem();
     }
 
     public String getGuiTitle() {
-        return guiTitle;
+        return CobbledPokeDexForge.dexProgressionConfig.configurableDexProgressions.get(id).getGuiTitle();
     }
 
-    public void setGuiTitle(String guiTitle) {
-        this.guiTitle = guiTitle;
-    }
 
     public List<String> getGuiLore() {
-        return guiLore;
+        return CobbledPokeDexForge.dexProgressionConfig.configurableDexProgressions.get(id).getGuiLore();
     }
 
-    public void setGuiLore(List<String> guiLore) {
-        this.guiLore = guiLore;
+    public boolean isClaimed() {
+        return claimed;
+    }
+
+    public void setClaimed(boolean claimed) {
+        this.claimed = claimed;
+    }
+
+    public void claimRewards(String playerName)
+    {
+        if (claimed)
+            return;
+
+        for (String s:rewards) {
+            Reward r = CobbledPokeDexForge.rewardsConfig.rewardHashMap.get(s);
+            if (r != null)
+            {
+                r.commands.forEach(s1 -> {
+                    Util.runCommand(s.replace("%pl%", playerName));
+                });
+            }
+        }
     }
 }
