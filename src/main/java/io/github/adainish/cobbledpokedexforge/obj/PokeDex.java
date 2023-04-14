@@ -253,6 +253,7 @@ public class PokeDex {
 
         Template template = ChestTemplate.builder(6)
                 .border(0, 0, 6, 9, filler())
+                .set(0, 0, backToMainPageButton())
                 .set(0, 3, previous)
                 .set(0, 4, progressionView)
                 .set(0, 5, next)
@@ -349,10 +350,22 @@ public class PokeDex {
         return GooeyPage.builder().template(templateBuilder.build()).build();
     }
 
+    public GooeyButton backToMainPageButton()
+    {
+        return GooeyButton.builder()
+                .title(Util.formattedString("&3Go Back"))
+                .onClick(b -> {
+                    UIManager.openUIForcefully(b.getPlayer(), mainUI());
+                })
+                .display(new ItemStack(Items.ARROW))
+                .build();
+    }
+
     public GooeyPage progressionMainMenu() {
         ChestTemplate.Builder templateBuilder = ChestTemplate.builder(6)
                 .border(0, 0, 6, 9, filler());
 
+        templateBuilder.set(0, 0, backToMainPageButton());
         CobbledPokeDexForge.dexProgressionConfig.configurableDexProgressions.forEach((s, configurableDexProgression) -> {
             DexProgression dexProgression = dexProgressionList.get(s);
             if (dexProgression != null) {
