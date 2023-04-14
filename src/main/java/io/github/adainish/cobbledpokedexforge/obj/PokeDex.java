@@ -180,10 +180,8 @@ public class PokeDex {
     public List<String> abilityList(Pokemon pokemon) {
         List<String> list = new ArrayList<>();
         pokemon.getSpecies().getAbilities().forEach(potentialAbility -> {
-            String s = "&7%name% &e-> &7%description%"
-                    .replace("%name%", potentialAbility.getTemplate().getName()
-                            .replace("%description%", potentialAbility.getTemplate().getDescription())
-                    );
+            String s = "&7%name%"
+                    .replace("%name%", potentialAbility.getTemplate().getName());
             list.add(Util.formattedString(s));
         });
         return list;
