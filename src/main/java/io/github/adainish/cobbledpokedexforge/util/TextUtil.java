@@ -58,7 +58,7 @@ public class TextUtil
 
     public static final TextColor BLUE = TextColor.parseColor("#00AFFC");
     public static final TextColor ORANGE = TextColor.parseColor("#FF6700");
-    private static final MutableComponent PLUGIN_PREFIX = Component.literal(Util.formattedString("&c&l[&b&PokeDex&c&l]")).setStyle(Style.EMPTY.withColor(BLUE));
+    private static final MutableComponent PLUGIN_PREFIX = Component.literal(Util.formattedString("&c&l[&b&lPokeDex&c&l]")).setStyle(Style.EMPTY.withColor(BLUE));
 
     private static final MutableComponent MESSAGE_PREFIX = getPluginPrefix().append(Component.literal(" » &6").setStyle(Style.EMPTY.withColor(ORANGE)));
 

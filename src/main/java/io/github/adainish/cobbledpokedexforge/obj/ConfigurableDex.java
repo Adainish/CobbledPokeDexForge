@@ -36,6 +36,7 @@ public class ConfigurableDex
                 return;
             DexPokemon dexPokemon = new DexPokemon(integer);
             player.pokeDex.pokemonData.put(integer, dexPokemon);
+            dexPokemon.rewardIDs = configurableDexPokemon.rewardIDs;
         });
         pokemonData.forEach((integer, dexPokemon) -> {
             player.pokeDex.pokemonData.get(integer).rewardIDs = dexPokemon.rewardIDs;

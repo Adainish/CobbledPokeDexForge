@@ -12,9 +12,14 @@ import ca.landonjw.gooeylibs2.api.page.LinkedPage;
 import ca.landonjw.gooeylibs2.api.template.Template;
 import ca.landonjw.gooeylibs2.api.template.types.ChestTemplate;
 import com.cobblemon.mod.common.CobblemonItems;
+import com.cobblemon.mod.common.api.pokemon.PokemonSpecies;
 import com.cobblemon.mod.common.api.pokemon.evolution.Evolution;
+import com.cobblemon.mod.common.api.spawning.CobblemonSpawnPools;
+import com.cobblemon.mod.common.api.spawning.detail.PokemonSpawnDetail;
+import com.cobblemon.mod.common.api.spawning.detail.SpawnDetail;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import io.github.adainish.cobbledpokedexforge.CobbledPokeDexForge;
+import io.github.adainish.cobbledpokedexforge.storage.PlayerStorage;
 import io.github.adainish.cobbledpokedexforge.util.Util;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -43,7 +48,7 @@ public class PokeDex {
                 total.set(total.get() + 1);
         });
 
-        double percentage = (double) total.get() * (double) pokemonData.size() * 100.0D;
+        double percentage = (double) total.get() / (double) PokemonSpecies.INSTANCE.getImplemented().size() * 100.0D;
         return Math.floor(percentage * Math.pow(10.0D, decimalPlaces)) / Math.pow(10.0D, decimalPlaces);
     }
 
@@ -93,10 +98,60 @@ public class PokeDex {
         return list;
     }
 
-    public List<String> spawnBiomes(Pokemon pokemon)
+    public List<PokemonSpawnDetail> getSpawnDetails(Pokemon pokemon)
+    {
+        List<PokemonSpawnDetail> spawnDetails = new ArrayList<>();
+        CobblemonSpawnPools.INSTANCE.getWORLD_SPAWN_POOL().iterator().forEachRemaining(spawnDetail -> {
+            if (spawnDetail instanceof PokemonSpawnDetail)
+            {
+                PokemonSpawnDetail pokemonSpawnDetail = (PokemonSpawnDetail) spawnDetail;
+                if (pokemonSpawnDetail.getPokemon().matches(pokemon)) {
+                    spawnDetails.add(pokemonSpawnDetail);
+                }
+            }
+        });
+        return spawnDetails;
+    }
+
+    public List<String> spawnData(Pokemon pokemon)
     {
         List<String> strings = new ArrayList<>();
 
+        CobblemonSpawnPools.INSTANCE.getWORLD_SPAWN_POOL().iterator().forEachRemaining(spawnDetail -> {
+            if (spawnDetail instanceof PokemonSpawnDetail)
+            {
+                PokemonSpawnDetail pokemonSpawnDetail = (PokemonSpawnDetail) spawnDetail;
+                if (pokemonSpawnDetail.getPokemon().matches(pokemon)) {
+                    strings.add("&7Level Range: %first% - %last%"
+                            .replace("%first%", String.valueOf(pokemonSpawnDetail.getLevelRange().getFirst()))
+                            .replace("%last%", String.valueOf(pokemonSpawnDetail.getLevelRange().getLast()))
+                    );
+                    if (pokemonSpawnDetail.getCompositeCondition() != null) {
+                        pokemonSpawnDetail.getCompositeCondition().getConditions().forEach(spawningCondition -> {
+                            spawningCondition.getTimeRange().getRanges().forEach(intRange -> {
+                                strings.add("Time Range: %start% - %finish%"
+                                        .replace("%start%", String.valueOf(intRange.getStart()))
+                                        .replace("%finish%", String.valueOf(intRange.getLast()))
+                                );
+                            });
+                            spawningCondition.getBiomes().forEach(biomeRegistryLikeCondition -> {
+
+                            });
+                        });
+                    }
+//                    if (!pokemonSpawnDetail.getDrops().getEntries().isEmpty()) {
+//                        strings.add("&bPossible Drops:");
+//                        pokemonSpawnDetail.getDrops().getEntries().forEach(dropEntry -> {
+//                            strings.add("%item% drop chance: %percentage%%"
+//                                            .replace("%item%", dropEntry.)
+//                                    .replace("%percentage%", String.valueOf(dropEntry.getPercentage())));
+//                        });
+//                    } else {
+//
+//                    }
+                }
+            }
+        });
         return strings;
     }
 
@@ -192,6 +247,7 @@ public class PokeDex {
 
         GooeyButton progressionView = GooeyButton.builder()
                 .title(Util.formattedString("&aPokeDex Progression"))
+                .lore(Util.formattedArrayList(Arrays.asList("&aCurrent Dex Progress %amount%%".replace("%amount%", String.valueOf(getCompletionPercentage(1))))))
                 .onClick(b -> UIManager.openUIForcefully(b.getPlayer(), progressionMainMenu()))
                 .display(new ItemStack(Items.ENCHANTED_BOOK)).build();
 
@@ -251,8 +307,32 @@ public class PokeDex {
 
         GooeyButton baseStats = GooeyButton.builder()
                 .title(Util.formattedString("&bBase Stats"))
-                .lore(baseStats(pokemon))
+                .lore(Util.formattedArrayList(baseStats(pokemon)))
                 .display(new ItemStack(CobblemonItems.MYSTIC_WATER.get()))
+                .build();
+
+        GooeyButton spawnData = GooeyButton.builder()
+                .title(Util.formattedString("&aSpawn Info"))
+                .lore(Util.formattedArrayList(spawnData(pokemon)))
+                .display(new ItemStack(CobblemonItems.SPELL_TAG.get()))
+                .build();
+
+        GooeyButton rewardsButton = GooeyButton.builder()
+                .title(Util.formattedString("&6Pokemon Rewards"))
+                .display(new ItemStack(Items.ENDER_CHEST))
+                .lore(Util.formattedArrayList(Arrays.asList("&eClaim rewards for registering this Pokemon")))
+                .onClick(b -> {
+                    Player player = PlayerStorage.getPlayer(b.getPlayer().getUUID());
+                    if (player != null) {
+                        Util.send(b.getPlayer(), "&cYou've claimed your rewards!");
+                        dexPokemon.claimRewards(b.getPlayer());
+                        player.pokeDex = this;
+                        player.save();
+                    } else {
+                        Util.send(b.getPlayer(), "&cSomething went wrong loading your data");
+                    }
+                    UIManager.closeUI(b.getPlayer());
+                })
                 .build();
 
         templateBuilder.set(1, 1, abilities);
@@ -262,6 +342,11 @@ public class PokeDex {
         templateBuilder.set(2, 2, eggMoves);
         templateBuilder.set(2, 4, evoMoves);
         templateBuilder.set(2, 6, baseStats);
+        templateBuilder.set(3, 1, spawnData);
+        if (dexPokemon.registered && !dexPokemon.getRewards().isEmpty() && !dexPokemon.claimed)
+        {
+            templateBuilder.set(3, 3, rewardsButton);
+        }
 
         return GooeyPage.builder().template(templateBuilder.build()).build();
     }
@@ -279,11 +364,25 @@ public class PokeDex {
                             .display(new ItemStack(Items.PAPER))
                             .lore(Util.formattedArrayList(configurableDexProgression.getGuiLore()))
                             .onClick(b -> {
-                                if (dexProgression.isClaimed())
+                                if (dexProgression.isClaimed()) {
+                                    Util.send(b.getPlayer(), "&cYou've already claimed these rewards");
                                     return;
-                                if (!completedPercent(dexProgression))
+                                }
+                                if (!completedPercent(dexProgression)) {
+                                    Util.send(b.getPlayer(), "&cYou've not reached the required amount");
                                     return;
-                                dexProgression.claimRewards(b.getPlayer().getName().getString());
+                                }
+
+                                Player player = PlayerStorage.getPlayer(b.getPlayer().getUUID());
+                                if (player != null) {
+                                    Util.send(b.getPlayer(), "&cYou've claimed your rewards!");
+                                    dexProgression.claimRewards(b.getPlayer());
+                                    player.pokeDex = this;
+                                    player.save();
+                                } else {
+                                    Util.send(b.getPlayer(), "&cSomething went wrong loading your data");
+                                }
+                                UIManager.closeUI(b.getPlayer());
                             })
                             .build();
                     templateBuilder.set(configurableDexProgression.getGuiSlot(), button);
@@ -293,7 +392,7 @@ public class PokeDex {
                 }
             }
         });
-        return GooeyPage.builder().template(templateBuilder.build()).build();
+        return GooeyPage.builder().template(templateBuilder.build()).title(Util.formattedString("&aCurrent Dex Progress %amount%%".replace("%amount%", String.valueOf(getCompletionPercentage(1))))).build();
     }
 
     public void openDex(ServerPlayer player) {

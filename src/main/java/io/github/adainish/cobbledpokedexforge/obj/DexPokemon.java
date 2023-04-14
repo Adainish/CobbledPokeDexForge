@@ -3,10 +3,13 @@ package io.github.adainish.cobbledpokedexforge.obj;
 import com.cobblemon.mod.common.api.pokemon.PokemonSpecies;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.cobblemon.mod.common.pokemon.Species;
+import io.github.adainish.cobbledpokedexforge.CobbledPokeDexForge;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DexPokemon
 {
@@ -40,6 +43,19 @@ public class DexPokemon
         if (seen)
             s = "&aSeen";
         return s;
+    }
+
+    public List<Reward> getRewards()
+    {
+        return rewardIDs.stream().filter(s -> CobbledPokeDexForge.rewardsConfig.rewardHashMap.containsKey(s)).map(s -> CobbledPokeDexForge.rewardsConfig.rewardHashMap.get(s)).collect(Collectors.toList());
+    }
+
+    public void claimRewards(ServerPlayer player)
+    {
+        claimed = true;
+        for (Reward r:getRewards()) {
+            r.giveRewards(player);
+        }
     }
 
 }

@@ -2,6 +2,7 @@ package io.github.adainish.cobbledpokedexforge.obj;
 
 import io.github.adainish.cobbledpokedexforge.CobbledPokeDexForge;
 import io.github.adainish.cobbledpokedexforge.util.Util;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +10,6 @@ import java.util.List;
 public class DexProgression
 {
     private String id;
-    private List<String> rewards = new ArrayList<>();
     private boolean claimed = false;
     public DexProgression(String id)
     {
@@ -54,19 +54,24 @@ public class DexProgression
         this.claimed = claimed;
     }
 
-    public void claimRewards(String playerName)
+    public List<Reward> getRewardsList()
+    {
+        List<Reward> rewardsList = new ArrayList<>();
+        for (String s:getRewards()) {
+            if (CobbledPokeDexForge.rewardsConfig.rewardHashMap.containsKey(s))
+                rewardsList.add(CobbledPokeDexForge.rewardsConfig.rewardHashMap.get(s));
+        }
+        return rewardsList;
+    }
+
+    public void claimRewards(ServerPlayer player)
     {
         if (claimed)
             return;
 
-        for (String s:rewards) {
-            Reward r = CobbledPokeDexForge.rewardsConfig.rewardHashMap.get(s);
-            if (r != null)
-            {
-                r.commands.forEach(s1 -> {
-                    Util.runCommand(s.replace("%pl%", playerName));
-                });
-            }
+        for (Reward r:getRewardsList()) {
+            r.giveRewards(player);
         }
+        this.claimed = true;
     }
 }
