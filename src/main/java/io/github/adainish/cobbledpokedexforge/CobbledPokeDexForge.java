@@ -36,7 +36,7 @@ public class CobbledPokeDexForge {
     public static final String MODID = "cobbledpokedexforge";
 
 
-    public static final String MOD_NAME = "CobbledOutbreaks";
+    public static final String MOD_NAME = "CobbledPokeDexForge";
     public static final String VERSION = "1.0.0-Beta";
     public static final String AUTHORS = "Winglet";
     public static final String YEAR = "2023";

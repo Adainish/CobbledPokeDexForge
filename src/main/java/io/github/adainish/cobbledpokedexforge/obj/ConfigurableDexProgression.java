@@ -10,9 +10,9 @@ public class ConfigurableDexProgression
     private List<String> rewards = new ArrayList<>();
     private double percentage = 0;
     private int guiSlot = 1;
-    private String guiItem;
-    private String guiTitle;
-    private List<String> guiLore;
+    private String guiItem = "minecraft:paper";
+    private String guiTitle = "&bDex Progression %amount%";
+    private List<String> guiLore = new ArrayList<>();
 
     public ConfigurableDexProgression(String id)
     {
@@ -58,7 +58,7 @@ public class ConfigurableDexProgression
     }
 
     public String getGuiTitle() {
-        return guiTitle;
+        return guiTitle.replace("%amount%", String.valueOf(getPercentage()));
     }
 
     public void setGuiTitle(String guiTitle) {
@@ -66,7 +66,11 @@ public class ConfigurableDexProgression
     }
 
     public List<String> getGuiLore() {
-        return guiLore;
+        List<String> formatted = new ArrayList<>();
+        for (String s:guiLore) {
+            formatted.add(s.replace("%amount%", String.valueOf(getPercentage())));
+        }
+        return formatted;
     }
 
     public void setGuiLore(List<String> guiLore) {

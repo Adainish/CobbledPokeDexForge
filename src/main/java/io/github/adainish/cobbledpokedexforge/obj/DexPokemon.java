@@ -2,6 +2,8 @@ package io.github.adainish.cobbledpokedexforge.obj;
 
 import com.cobblemon.mod.common.api.pokemon.PokemonSpecies;
 import com.cobblemon.mod.common.pokemon.Pokemon;
+import com.cobblemon.mod.common.pokemon.Species;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +23,7 @@ public class DexPokemon
 
     public Pokemon getPokemon()
     {
-        return PokemonSpecies.INSTANCE.getByPokedexNumber(pokeDexNumber, "cobblemon:").create(100);
+        return PokemonSpecies.INSTANCE.getByPokedexNumber(pokeDexNumber, "cobblemon").create(100);
     }
 
     public String registeredStatus()

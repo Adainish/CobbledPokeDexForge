@@ -170,9 +170,11 @@ public class PokeDex {
         return buttons;
     }
 
-    public GooeyButton filler = GooeyButton.builder()
-            .display(new ItemStack(Blocks.GRAY_STAINED_GLASS_PANE, 1))
-            .build();
+    public GooeyButton filler() {
+        return GooeyButton.builder()
+                .display(new ItemStack(Blocks.GRAY_STAINED_GLASS_PANE, 1))
+                .build();
+    }
 
     public LinkedPage mainUI() {
         // TODO: 13/04/2023 Add Generation Sorting
@@ -196,7 +198,7 @@ public class PokeDex {
         PlaceholderButton placeHolderButton = new PlaceholderButton();
 
         Template template = ChestTemplate.builder(6)
-                .border(0, 0, 6, 9, filler)
+                .border(0, 0, 6, 9, filler())
                 .set(0, 3, previous)
                 .set(0, 4, progressionView)
                 .set(0, 5, next)
@@ -208,7 +210,7 @@ public class PokeDex {
 
     public GooeyPage pokemonPage(DexPokemon dexPokemon) {
         ChestTemplate.Builder templateBuilder = ChestTemplate.builder(6)
-                .border(0, 0, 6, 9, filler);
+                .border(0, 0, 6, 9, filler());
 
         Pokemon pokemon = dexPokemon.getPokemon();
         GooeyButton abilities = GooeyButton.builder()
@@ -266,24 +268,30 @@ public class PokeDex {
 
     public GooeyPage progressionMainMenu() {
         ChestTemplate.Builder templateBuilder = ChestTemplate.builder(6)
-                .border(0, 0, 6, 9, filler);
+                .border(0, 0, 6, 9, filler());
 
         CobbledPokeDexForge.dexProgressionConfig.configurableDexProgressions.forEach((s, configurableDexProgression) -> {
             DexProgression dexProgression = dexProgressionList.get(s);
-
-            GooeyButton button = GooeyButton.builder()
-                    .title(Util.formattedString(dexProgression.getGuiTitle()))
-                    .display(new ItemStack(Items.PAPER))
-                    .lore(Util.formattedArrayList(dexProgression.getGuiLore()))
-                    .onClick(b -> {
-                        if (dexProgression.isClaimed())
-                            return;
-                        if (!completedPercent(dexProgression))
-                            return;
-                        dexProgression.claimRewards(b.getPlayer().getName().getString());
-                    })
-                    .build();
-            templateBuilder.set(configurableDexProgression.getGuiSlot(), button);
+            if (dexProgression != null) {
+                try {
+                    GooeyButton button = GooeyButton.builder()
+                            .title(Util.formattedString(configurableDexProgression.getGuiTitle()))
+                            .display(new ItemStack(Items.PAPER))
+                            .lore(Util.formattedArrayList(configurableDexProgression.getGuiLore()))
+                            .onClick(b -> {
+                                if (dexProgression.isClaimed())
+                                    return;
+                                if (!completedPercent(dexProgression))
+                                    return;
+                                dexProgression.claimRewards(b.getPlayer().getName().getString());
+                            })
+                            .build();
+                    templateBuilder.set(configurableDexProgression.getGuiSlot(), button);
+                } catch (Exception e) {
+                    CobbledPokeDexForge.getLog().error("An issue was detected in the Progression GUI");
+                    CobbledPokeDexForge.getLog().error(e);
+                }
+            }
         });
         return GooeyPage.builder().template(templateBuilder.build()).build();
     }

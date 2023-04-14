@@ -79,6 +79,18 @@ public class Player
     public void syncWithConfigurable()
     {
         CobbledPokeDexForge.configurableDex.syncConfigData(this);
+        pokeDex.dexProgressionList.forEach((s, dexProgression) -> {
+            if (CobbledPokeDexForge.dexProgressionConfig.configurableDexProgressions.get(s) != null)
+                return;
+            pokeDex.dexProgressionList.remove(s);
+        });
+        CobbledPokeDexForge.dexProgressionConfig.configurableDexProgressions.forEach((s, configurableDexProgression) -> {
+            if (!pokeDex.dexProgressionList.containsKey(s))
+            {
+                DexProgression dexProgression = new DexProgression(s);
+                pokeDex.dexProgressionList.put(s, dexProgression);
+            }
+        });
     }
 
     public void register(PokemonEntity pokemon, boolean seen, boolean caught)
