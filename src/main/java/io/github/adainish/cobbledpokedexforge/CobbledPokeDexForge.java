@@ -2,11 +2,13 @@ package io.github.adainish.cobbledpokedexforge;
 
 import io.github.adainish.cobbledpokedexforge.cmd.Command;
 import io.github.adainish.cobbledpokedexforge.config.ConfigurableDexConfig;
+import io.github.adainish.cobbledpokedexforge.config.DBConfig;
 import io.github.adainish.cobbledpokedexforge.config.DexProgressionConfig;
 import io.github.adainish.cobbledpokedexforge.config.RewardsConfig;
 import io.github.adainish.cobbledpokedexforge.listener.PlayerListener;
 import io.github.adainish.cobbledpokedexforge.obj.ConfigurableDex;
-import io.github.adainish.cobbledpokedexforge.obj.DexProgression;
+import io.github.adainish.cobbledpokedexforge.storage.Database;
+import io.github.adainish.cobbledpokedexforge.storage.PlayerStorage;
 import io.github.adainish.cobbledpokedexforge.subscriptions.EventSubscriptions;
 import io.github.adainish.cobbledpokedexforge.wrapper.Wrapper;
 import net.minecraft.server.MinecraftServer;
@@ -26,18 +28,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.util.Comparator;
 
-// The value here should match an entry in the META-INF/mods.toml file
 @Mod(CobbledPokeDexForge.MODID)
 public class CobbledPokeDexForge {
-
-    // Define mod id in a common place for everything to reference
     public static final String MODID = "cobbledpokedexforge";
-
-
     public static final String MOD_NAME = "CobbledPokeDexForge";
-    public static final String VERSION = "1.0.0-Beta";
+    public static final String VERSION = "1.0.2-Beta";
     public static final String AUTHORS = "Winglet";
     public static final String YEAR = "2023";
     private static final Logger log = LogManager.getLogger(MOD_NAME);
@@ -54,9 +50,7 @@ public class CobbledPokeDexForge {
     public static RewardsConfig rewardsConfig;
 
     public static DexProgressionConfig dexProgressionConfig;
-
-    // Directly reference a slf4j logger
-
+    public static DBConfig dbConfig;
     public static Wrapper wrapper;
 
     public static EventSubscriptions subscriptions;
@@ -65,25 +59,19 @@ public class CobbledPokeDexForge {
         return log;
     }
 
+    public static PlayerStorage playerStorage;
+
 
     public CobbledPokeDexForge() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-
-        // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
-
-        // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
     }
 
     @SubscribeEvent
     public void onServerShutDown(ServerStoppingEvent event)
     {
-        log.warn("Saving player data...");
-        wrapper.playerHashMap.forEach((uuid, player) -> {
-            player.saveNoCache();
-        });
-        wrapper.playerHashMap.clear();
+        this.handleShutDown();
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -93,25 +81,30 @@ public class CobbledPokeDexForge {
                 .replace("%v", VERSION)
                 .replace("%y", YEAR)
         );
-        initDirs();
+        this.initDirs();
     }
 
     @SubscribeEvent
     public void onCommandRegistry(RegisterCommandsEvent event) {
-
         //register commands
         event.getDispatcher().register(Command.getCommand());
-
     }
 
-    // You can use SubscribeEvent and let the Event Bus discover methods to call
     @SubscribeEvent
     public void onServerStarted(ServerStartedEvent event)
     {
         setServer(ServerLifecycleHooks.getCurrentServer());
+        playerStorage = new PlayerStorage();
         wrapper = new Wrapper();
-     //load configurable dex from config
-        initConfigs();
+        //load configurable dex from config
+        this.initConfigs();
+        if (dbConfig != null)
+        {
+            if (dbConfig.enabled)
+            {
+                playerStorage.database = new Database();
+            }
+        }
         subscriptions = new EventSubscriptions();
         MinecraftForge.EVENT_BUS.register(new PlayerListener());
     }
@@ -137,7 +130,20 @@ public class CobbledPokeDexForge {
 
         ConfigurableDexConfig.writeConfig();
         configurableDexConfig = ConfigurableDexConfig.getConfig();
-        configurableDex = configurableDexConfig.configurableDex;
+
+        if (configurableDexConfig != null) {
+            configurableDex = configurableDexConfig.configurableDex;
+        }
+
+        DBConfig.writeConfig();
+        dbConfig = DBConfig.getConfig();
+    }
+
+    public void handleShutDown()
+    {
+        playerStorage.saveAll();
+        if (playerStorage.database != null)
+            playerStorage.database.shutdown();
     }
 
 

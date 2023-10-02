@@ -8,7 +8,7 @@ import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.cobblemon.mod.common.pokemon.Species;
 import io.github.adainish.cobbledpokedexforge.CobbledPokeDexForge;
-import io.github.adainish.cobbledpokedexforge.storage.PlayerStorage;
+import org.bson.Document;
 
 import java.util.*;
 
@@ -23,15 +23,23 @@ public class Player
         this.pokeDex = new PokeDex();
     }
 
+    // Convert Player to Document
+    public Document toDocument() {
+        Document document = new Document();
+        document.put("uuid", uuid.toString()); // Convert UUID to String for storage
+        document.put("pokedex", pokeDex);
+        return document;
+    }
+
     public void saveNoCache()
     {
-        PlayerStorage.savePlayerNoCache(this);
+        CobbledPokeDexForge.playerStorage.savePlayerNoCache(this);
     }
 
     public void save()
     {
         //save to storage file
-        PlayerStorage.savePlayer(this);
+        CobbledPokeDexForge.playerStorage.savePlayer(this);
     }
 
     public void registerFromStorage()
@@ -79,11 +87,14 @@ public class Player
     public void syncWithConfigurable()
     {
         CobbledPokeDexForge.configurableDex.syncConfigData(this);
+        List<String> toRemoveProgressions = new ArrayList<>();
         pokeDex.dexProgressionList.forEach((s, dexProgression) -> {
             if (CobbledPokeDexForge.dexProgressionConfig.configurableDexProgressions.get(s) != null)
                 return;
-            pokeDex.dexProgressionList.remove(s);
+            toRemoveProgressions.add(s);
         });
+        toRemoveProgressions.stream().filter(s -> pokeDex.dexProgressionList.get(s) != null).forEach(s -> pokeDex.dexProgressionList.remove(s));
+
         CobbledPokeDexForge.dexProgressionConfig.configurableDexProgressions.forEach((s, configurableDexProgression) -> {
             if (!pokeDex.dexProgressionList.containsKey(s))
             {
@@ -114,10 +125,7 @@ public class Player
         }
         if (dexPokemon.seen && dexPokemon.registered)
             return;
-        if (seen) {
-            if (!dexPokemon.seen)
-                dexPokemon.seen = true;
-        }
+        if (seen && !dexPokemon.seen) dexPokemon.seen = true;
         if (caught)
         {
             if (!dexPokemon.registered)

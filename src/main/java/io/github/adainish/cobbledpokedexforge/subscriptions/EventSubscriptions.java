@@ -2,6 +2,7 @@ package io.github.adainish.cobbledpokedexforge.subscriptions;
 
 import com.cobblemon.mod.common.api.Priority;
 import com.cobblemon.mod.common.api.events.CobblemonEvents;
+import io.github.adainish.cobbledpokedexforge.CobbledPokeDexForge;
 import io.github.adainish.cobbledpokedexforge.obj.Player;
 import io.github.adainish.cobbledpokedexforge.storage.PlayerStorage;
 import kotlin.Unit;
@@ -20,7 +21,7 @@ public class EventSubscriptions
     {
         CobblemonEvents.POKEMON_FAINTED.subscribe(Priority.NORMAL, event -> {
             try {
-                Player player = PlayerStorage.getPlayer(event.component1().getOwnerPlayer().getUUID());
+                Player player = CobbledPokeDexForge.playerStorage.getPlayer(event.component1().getOwnerPlayer().getUUID());
                 if (player != null)
                 {
                     player.register(event.getPokemon(), true, false);
@@ -40,7 +41,7 @@ public class EventSubscriptions
     {
         CobblemonEvents.EVOLUTION_COMPLETE.subscribe(Priority.NORMAL, event -> {
             try {
-                Player player = PlayerStorage.getPlayer(event.component1().getOwnerPlayer().getUUID());
+                Player player = CobbledPokeDexForge.playerStorage.getPlayer(event.component1().getOwnerPlayer().getUUID());
                 if (player != null)
                 {
                     player.register(event.getPokemon(), true, true);
@@ -59,7 +60,7 @@ public class EventSubscriptions
     public void subscribeToCapture()
     {
         CobblemonEvents.POKEMON_CAPTURED.subscribe(Priority.NORMAL, event -> {
-            Player player = PlayerStorage.getPlayer(event.getPlayer().getUUID());
+            Player player = CobbledPokeDexForge.playerStorage.getPlayer(event.getPlayer().getUUID());
             if (player != null)
             {
                 player.register(event.getPokemon(), true, true);

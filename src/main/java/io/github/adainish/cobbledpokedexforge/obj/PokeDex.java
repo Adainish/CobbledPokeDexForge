@@ -16,7 +16,6 @@ import com.cobblemon.mod.common.api.pokemon.PokemonSpecies;
 import com.cobblemon.mod.common.api.pokemon.evolution.Evolution;
 import com.cobblemon.mod.common.api.spawning.CobblemonSpawnPools;
 import com.cobblemon.mod.common.api.spawning.detail.PokemonSpawnDetail;
-import com.cobblemon.mod.common.api.spawning.detail.SpawnDetail;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import io.github.adainish.cobbledpokedexforge.CobbledPokeDexForge;
 import io.github.adainish.cobbledpokedexforge.storage.PlayerStorage;
@@ -49,6 +48,8 @@ public class PokeDex {
         });
 
         double percentage = (double) total.get() / (double) PokemonSpecies.INSTANCE.getImplemented().size() * 100.0D;
+        if (!CobbledPokeDexForge.configurableDexConfig.checkByImplemented)
+            percentage = (double) total.get() / (double) PokemonSpecies.INSTANCE.getSpecies().size() * 100.0D;
         return Math.floor(percentage * Math.pow(10.0D, decimalPlaces)) / Math.pow(10.0D, decimalPlaces);
     }
 
@@ -253,7 +254,6 @@ public class PokeDex {
 
         Template template = ChestTemplate.builder(6)
                 .border(0, 0, 6, 9, filler())
-                .set(0, 0, backToMainPageButton())
                 .set(0, 3, previous)
                 .set(0, 4, progressionView)
                 .set(0, 5, next)
@@ -321,7 +321,7 @@ public class PokeDex {
                 .display(new ItemStack(Items.ENDER_CHEST))
                 .lore(Util.formattedArrayList(Arrays.asList("&eClaim rewards for registering this Pokemon")))
                 .onClick(b -> {
-                    Player player = PlayerStorage.getPlayer(b.getPlayer().getUUID());
+                    Player player = CobbledPokeDexForge.playerStorage.getPlayer(b.getPlayer().getUUID());
                     if (player != null) {
                         Util.send(b.getPlayer(), "&cYou've claimed your rewards!");
                         dexPokemon.claimRewards(b.getPlayer());
@@ -333,7 +333,7 @@ public class PokeDex {
                     UIManager.closeUI(b.getPlayer());
                 })
                 .build();
-
+        templateBuilder.set(0, 0, backToMainPageButton());
         templateBuilder.set(1, 1, abilities);
         templateBuilder.set(1, 3, evolutions);
         templateBuilder.set(1, 5, learnMoves);
@@ -384,7 +384,7 @@ public class PokeDex {
                                     return;
                                 }
 
-                                Player player = PlayerStorage.getPlayer(b.getPlayer().getUUID());
+                                Player player = CobbledPokeDexForge.playerStorage.getPlayer(b.getPlayer().getUUID());
                                 if (player != null) {
                                     Util.send(b.getPlayer(), "&cYou've claimed your rewards!");
                                     dexProgression.claimRewards(b.getPlayer());
