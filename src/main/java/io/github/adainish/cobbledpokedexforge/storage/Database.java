@@ -99,13 +99,15 @@ public class Database
                 return false;
             }
             // Create a new Player object
-            Player player = new Player(uuid);
+            Player player = CobbledPokeDexForge.playerStorage.getPlayer(uuid);
+            if (player == null)
+                player = new Player(uuid);
+                // Convert Player object to Document
+                Document playerDocument = player.toDocument();
 
-            // Convert Player object to Document
-            Document playerDocument = player.toDocument();
+                // Insert the new player Document into MongoDB
+                collection.insertOne(playerDocument);
 
-            // Insert the new player Document into MongoDB
-            collection.insertOne(playerDocument);
             return true;
         } catch (Exception e) {
             e.printStackTrace();

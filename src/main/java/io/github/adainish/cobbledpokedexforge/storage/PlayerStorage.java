@@ -28,8 +28,7 @@ public class PlayerStorage {
         if (CobbledPokeDexForge.wrapper.playerHashMap.containsKey(uuid))
             return CobbledPokeDexForge.wrapper.playerHashMap.get(uuid);
         if (CobbledPokeDexForge.dbConfig.enabled) {
-            if (this.database != null)
-            {
+            if (this.database != null) {
                 return this.database.getPlayer(uuid);
             }
         }
