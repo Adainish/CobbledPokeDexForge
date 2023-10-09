@@ -268,7 +268,7 @@ public class PokeDex {
 
         Pokemon pokemon = dexPokemon.getPokemon();
         GooeyButton abilities = GooeyButton.builder()
-                .display(new ItemStack(CobblemonItems.CLOVER_SWEET.get()))
+                .display(new ItemStack(CobblemonItems.CLOVER_SWEET.asItem()))
                 .title(Util.formattedString("&eAbilities:"))
                 .lore(Util.formattedArrayList(abilityList(pokemon)))
                 .build();
@@ -276,43 +276,43 @@ public class PokeDex {
         GooeyButton learnMoves = GooeyButton.builder()
                 .title(Util.formattedString("&dLevel Up Moves"))
                 .lore(Util.formattedArrayList(levelUpMoveList(pokemon)))
-                .display(new ItemStack(CobblemonItems.RARE_CANDY.get()))
+                .display(new ItemStack(CobblemonItems.RARE_CANDY.asItem()))
                 .build();
 
         GooeyButton tmMoves = GooeyButton.builder()
                 .title(Util.formattedString("&cTM Moves"))
                 .lore(Util.formattedArrayList(tmList(pokemon)))
-                .display(new ItemStack(CobblemonItems.MUSCLE_BAND.get()))
+                .display(new ItemStack(CobblemonItems.MUSCLE_BAND.asItem()))
                 .build();
 
         GooeyButton eggMoves = GooeyButton.builder()
                 .title(Util.formattedString("&bEgg Moves"))
                 .lore(Util.formattedArrayList(eggMoveList(pokemon)))
-                .display(new ItemStack(CobblemonItems.LUCKY_EGG.get()))
+                .display(new ItemStack(CobblemonItems.LUCKY_EGG.asItem()))
                 .build();
 
         GooeyButton evoMoves = GooeyButton.builder()
                 .title(Util.formattedString("&cEvolution Moves"))
                 .lore(Util.formattedArrayList(evoMoveList(pokemon)))
-                .display(new ItemStack(CobblemonItems.MAGMARIZER.get()))
+                .display(new ItemStack(CobblemonItems.MAGMARIZER.asItem()))
                 .build();
 
         GooeyButton evolutions = GooeyButton.builder()
                 .title(Util.formattedString("&dEvolutions"))
                 .lore(Util.formattedArrayList(evolutions(pokemon)))
-                .display(new ItemStack(CobblemonItems.THUNDER_STONE.get()))
+                .display(new ItemStack(CobblemonItems.THUNDER_STONE.asItem()))
                 .build();
 
         GooeyButton baseStats = GooeyButton.builder()
                 .title(Util.formattedString("&bBase Stats"))
                 .lore(Util.formattedArrayList(baseStats(pokemon)))
-                .display(new ItemStack(CobblemonItems.MYSTIC_WATER.get()))
+                .display(new ItemStack(CobblemonItems.MYSTIC_WATER.asItem()))
                 .build();
 
         GooeyButton spawnData = GooeyButton.builder()
                 .title(Util.formattedString("&aSpawn Info"))
                 .lore(Util.formattedArrayList(spawnData(pokemon)))
-                .display(new ItemStack(CobblemonItems.SPELL_TAG.get()))
+                .display(new ItemStack(CobblemonItems.SPELL_TAG.asItem()))
                 .build();
 
         GooeyButton rewardsButton = GooeyButton.builder()
