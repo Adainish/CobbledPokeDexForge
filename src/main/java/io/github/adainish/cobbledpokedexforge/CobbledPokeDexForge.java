@@ -33,7 +33,7 @@ import java.io.File;
 public class CobbledPokeDexForge {
     public static final String MODID = "cobbledpokedexforge";
     public static final String MOD_NAME = "CobbledPokeDexForge";
-    public static final String VERSION = "1.0.2-Beta";
+    public static final String VERSION = "1.1.0-Alpha";
     public static final String AUTHORS = "Winglet";
     public static final String YEAR = "2023";
     private static final Logger log = LogManager.getLogger(MOD_NAME);
