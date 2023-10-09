@@ -17,15 +17,12 @@ import com.cobblemon.mod.common.api.pokemon.evolution.Evolution;
 import com.cobblemon.mod.common.api.spawning.CobblemonSpawnPools;
 import com.cobblemon.mod.common.api.spawning.detail.PokemonSpawnDetail;
 import com.cobblemon.mod.common.pokemon.Pokemon;
-import com.google.gson.Gson;
 import io.github.adainish.cobbledpokedexforge.CobbledPokeDexForge;
-import io.github.adainish.cobbledpokedexforge.util.Adapters;
 import io.github.adainish.cobbledpokedexforge.util.Util;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
-import org.bson.Document;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,15 +36,6 @@ public class PokeDex {
 
     public PokeDex() {
 
-    }
-
-    public Document toDocument() {
-
-
-        Document document = new Document();
-        document.put("pokemonData", this.pokemonData);
-        document.put("dexProgressionList", this.dexProgressionList);
-        return document;
     }
 
     public double getCompletionPercentage(int decimalPlaces) {
