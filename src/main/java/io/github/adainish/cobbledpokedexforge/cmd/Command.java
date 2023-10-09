@@ -50,6 +50,29 @@ public class Command
                             return 1;
                         })
                 )
+                .then(Commands.literal("wipe")
+                        .requires(commandSourceStack -> commandSourceStack.hasPermission(4))
+                        .executes(cc -> {
+                            if (CobbledPokeDexForge.dbConfig.enabled) {
+                                if (CobbledPokeDexForge.playerStorage.database != null) {
+                                    try {
+                                        Util.send(cc.getSource().source, "&eNow attempting full data wipe for pokedex");
+                                        CobbledPokeDexForge.playerStorage.database.collection.drop();
+                                        CobbledPokeDexForge.playerStorage.database.database.drop();
+//                                        CobbledPokeDexForge.playerStorage.database.migratePlayerData();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                        Util.send(cc.getSource().source, "&cSomething went wrong while migrating, please check your console for errors!");
+                                    }
+                                } else {
+                                    Util.send(cc.getSource().source, "&cWe failed to retrieve the database! This isn't good");
+                                }
+                            } else {
+                                Util.send(cc.getSource().source, "&cThe database is marked as disabled in the config!");
+                            }
+                            return 1;
+                        })
+                )
                 ;
     }
 }

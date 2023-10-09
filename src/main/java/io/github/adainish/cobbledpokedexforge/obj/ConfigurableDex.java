@@ -32,14 +32,14 @@ public class ConfigurableDex
     {
         //add new entries
         CobbledPokeDexForge.configurableDex.pokemonData.forEach((integer, configurableDexPokemon) -> {
-            if (player.pokeDex.pokemonData.containsKey(integer))
+            if (player.pokeDex.pokemonData.containsKey(String.valueOf(integer)))
                 return;
             DexPokemon dexPokemon = new DexPokemon(integer);
-            player.pokeDex.pokemonData.put(integer, dexPokemon);
+            player.pokeDex.pokemonData.put(String.valueOf(integer), dexPokemon);
             dexPokemon.rewardIDs = configurableDexPokemon.rewardIDs;
         });
         pokemonData.forEach((integer, dexPokemon) -> {
-            player.pokeDex.pokemonData.get(integer).rewardIDs = dexPokemon.rewardIDs;
+            player.pokeDex.pokemonData.get(String.valueOf(integer)).rewardIDs = dexPokemon.rewardIDs;
         });
     }
 }

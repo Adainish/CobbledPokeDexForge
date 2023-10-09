@@ -7,7 +7,9 @@ import com.cobblemon.mod.common.api.storage.pc.PCStore;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.cobblemon.mod.common.pokemon.Species;
+import com.google.gson.Gson;
 import io.github.adainish.cobbledpokedexforge.CobbledPokeDexForge;
+import io.github.adainish.cobbledpokedexforge.util.Adapters;
 import org.bson.Document;
 
 import java.util.*;
@@ -25,10 +27,9 @@ public class Player
 
     // Convert Player to Document
     public Document toDocument() {
-        Document document = new Document();
-        document.put("uuid", uuid.toString()); // Convert UUID to String for storage
-        document.put("pokedex", pokeDex);
-        return document;
+        Gson gson  = Adapters.PRETTY_MAIN_GSON;
+        String json = gson.toJson(this);
+        return Document.parse(json);
     }
 
     public void saveNoCache()
@@ -133,7 +134,7 @@ public class Player
                 dexPokemon.registered = true;
             }
         }
-        this.pokeDex.pokemonData.put(dexPokemon.pokeDexNumber, dexPokemon);
+        this.pokeDex.pokemonData.put(String.valueOf(dexPokemon.pokeDexNumber), dexPokemon);
     }
 
     public void updateCache() {

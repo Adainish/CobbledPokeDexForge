@@ -1,5 +1,6 @@
 package io.github.adainish.cobbledpokedexforge.storage;
 
+import com.google.gson.Gson;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
@@ -9,11 +10,18 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
 import io.github.adainish.cobbledpokedexforge.CobbledPokeDexForge;
+import io.github.adainish.cobbledpokedexforge.config.MongoCodecStringArray;
 import io.github.adainish.cobbledpokedexforge.obj.Player;
 import io.github.adainish.cobbledpokedexforge.obj.PokeDex;
 import org.bson.Document;
+import org.bson.codecs.configuration.CodecRegistries;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.PojoCodecProvider;
 
 import java.util.UUID;
+
+import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
+import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
 public class Database
 {
@@ -37,6 +45,7 @@ public class Database
     {
         //close connection
         if (mongoClient != null) {
+
             CobbledPokeDexForge.getLog().warn("Shutting down database connection");
             mongoClient.close();
         } else CobbledPokeDexForge.getLog().warn("Something went wrong while shutting down the mongo db, was it ever set up to begin with?");
@@ -44,11 +53,8 @@ public class Database
 
     // Static method to create a Player object from a Document
     public Player fromDocument(Document document) {
-        UUID uuid = UUID.fromString(document.getString("uuid")); // Convert String back to UUID
-        PokeDex pokeDex = (PokeDex) document.get("pokedex");
-        Player player = new Player(uuid);
-        player.pokeDex = pokeDex;
-        return player;
+        Gson gson = new Gson();
+        return gson.fromJson(document.toJson(), Player.class);
     }
 
     public boolean save(Player player)
@@ -132,7 +138,12 @@ public class Database
     {
         try {
             ConnectionString connectionString = new ConnectionString(CobbledPokeDexForge.dbConfig.mongoDBURI);
-            mongoClientSettings = MongoClientSettings.builder().applyConnectionString(connectionString).retryWrites(true).build();
+            CodecRegistry codecRegistry = fromRegistries(
+                    CodecRegistries.fromCodecs(new MongoCodecStringArray()), // <---- this is the custom codec
+                    MongoClientSettings.getDefaultCodecRegistry(),
+                    fromProviders(PojoCodecProvider.builder().automatic(true).build())
+            );
+            mongoClientSettings = MongoClientSettings.builder().codecRegistry(codecRegistry).applyConnectionString(connectionString).retryWrites(true).build();
             mongoClient = MongoClients.create(mongoClientSettings);
             database = mongoClient.getDatabase(CobbledPokeDexForge.dbConfig.database);
             collection = database.getCollection(CobbledPokeDexForge.dbConfig.tableName);
