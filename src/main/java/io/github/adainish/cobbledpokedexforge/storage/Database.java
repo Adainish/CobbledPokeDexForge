@@ -63,6 +63,7 @@ public class Database
             Document playerDoc = player.toDocument();
             // Insert or replace the document in MongoDB using the player's UUID as the key
             collection.replaceOne(Filters.eq("uuid", player.uuid.toString()), playerDoc, new ReplaceOptions().upsert(true));
+            
             return true;
         } catch (Exception e)
         {
@@ -104,7 +105,6 @@ public class Database
                 player = new Player(uuid);
                 // Convert Player object to Document
                 Document playerDocument = player.toDocument();
-
                 // Insert the new player Document into MongoDB
                 collection.insertOne(playerDocument);
 
@@ -161,7 +161,7 @@ public class Database
 
     public boolean migratePlayerData()
     {
-        CobbledPokeDexForge.playerStorage.getAllPlayersFromFiles().forEach(player -> {
+        CobbledPokeDexForge.playerStorage.getAllPlayersFromFiles(true).forEach(player -> {
             CobbledPokeDexForge.getLog().warn("Now migrating data for: %uuid%".replace("%uuid%", player.uuid.toString()));
             if (makePlayer(player.uuid)) {
                 CobbledPokeDexForge.getLog().warn("Migrated data for: %uuid%".replace("%uuid%", player.uuid.toString()));
