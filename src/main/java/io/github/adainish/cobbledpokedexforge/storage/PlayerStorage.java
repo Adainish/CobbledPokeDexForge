@@ -24,6 +24,28 @@ public class PlayerStorage {
         CobbledPokeDexForge.wrapper.playerHashMap.clear();
     }
 
+    public Player getPlayerFlatFile(UUID uuid) {
+        if (CobbledPokeDexForge.wrapper.playerHashMap.containsKey(uuid))
+            return CobbledPokeDexForge.wrapper.playerHashMap.get(uuid);
+
+        File dir = CobbledPokeDexForge.getPlayerStorageDir();
+        dir.mkdirs();
+
+
+        File dataFile = new File(dir, "%uuid%.json".replaceAll("%uuid%", String.valueOf(uuid)));
+        Gson gson = Adapters.PRETTY_MAIN_GSON;
+        JsonReader reader = null;
+        try {
+            reader = new JsonReader(new FileReader(dataFile));
+        } catch (FileNotFoundException e) {
+            CobbledPokeDexForge.getLog().error("Something went wrong attempting to read the Player Data, new Player Perhaps?");
+            return null;
+        }
+        return gson.fromJson(reader, Player.class);
+
+
+    }
+
     public Player getPlayer(UUID uuid) {
         if (CobbledPokeDexForge.wrapper.playerHashMap.containsKey(uuid))
             return CobbledPokeDexForge.wrapper.playerHashMap.get(uuid);
@@ -159,7 +181,7 @@ public class PlayerStorage {
     }
 
 
-    public List<Player> getAllPlayersFromFiles()
+    public List<Player> getAllPlayersFromFiles(boolean database)
     {
 
         List<UUID> addedPlayers = new ArrayList<>();
@@ -175,13 +197,19 @@ public class PlayerStorage {
                     uuid = UUID.fromString(f.getName().replace(".json", ""));
                 } catch (IllegalArgumentException e)
                 {
+                    e.printStackTrace();
                     continue;
                 }
                 if (addedPlayers.contains(uuid))
                     continue;
-                Player p = getPlayer(uuid);
-                if (p == null)
+                Player p;
+                if (database)
+                p = getPlayer(uuid);
+                else p = getPlayerFlatFile(uuid);
+                if (p == null) {
+                    CobbledPokeDexForge.getLog().warn("Failed retrieving data for %uuid%".replace("%uuid%", uuid.toString()));
                     continue;
+                }
                 playerList.add(p);
                 addedPlayers.add(uuid);
             }
