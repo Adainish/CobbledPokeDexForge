@@ -20,7 +20,13 @@ import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
@@ -163,19 +169,34 @@ public class Database
 
     public boolean migratePlayerData()
     {
-        Task.builder().execute(task -> {
-            CobbledPokeDexForge.playerStorage.getAllPlayersFromFiles(false).forEach(player -> {
-                Task.builder().execute(secondTask -> {
-                    CobbledPokeDexForge.getLog().warn("Now migrating data for: %uuid%".replace("%uuid%", player.uuid.toString()));
-                    if (makePlayer(player.uuid)) {
-                        CobbledPokeDexForge.getLog().warn("Migrated data for: %uuid%".replace("%uuid%", player.uuid.toString()));
-                    } else {
-                        CobbledPokeDexForge.getLog().warn("Couldn't make a player entry for %uuid%, did this player already exist in the database?".replace("%uuid%", player.uuid.toString()));
-                    }
-                }).interval(1).delay(2).iterations(1).build();
-            });
-        }).iterations(1).build();
-
+        List<Player> list = new ArrayList<>(CobbledPokeDexForge.playerStorage.getAllPlayersFromFiles(false));
+        int currentMigrated = 0;
+        int failed = 0;
+        int totalToMigrate = list.size() + 1;
+        ExecutorService executor = Executors.newCachedThreadPool();
+        CobbledPokeDexForge.getLog().warn("Starting migration for %amount% player files...".replace("%amount%", String.valueOf(totalToMigrate)));
+        // Schedule tasks to run asynchronously
+        for (int i = 0; i < list.size(); i++) {
+            final int taskNumber = i;
+            Player player = list.get(i);
+            CobbledPokeDexForge.getLog().warn("Now migrating data for: %uuid%".replace("%uuid%", player.uuid.toString()));
+            if (makePlayer(player.uuid)) {
+                currentMigrated++;
+                CobbledPokeDexForge.getLog().warn("Migrated data for: %uuid%".replace("%uuid%", player.uuid.toString()));
+            } else {
+                failed++;
+                CobbledPokeDexForge.getLog().warn("Couldn't make a player entry for %uuid%, did this player already exist in the database?".replace("%uuid%", player.uuid.toString()));
+            }
+            CobbledPokeDexForge.getLog().warn("Task " + taskNumber + " executed asynchronously on thread: " + Thread.currentThread().getName());
+        }
+        CobbledPokeDexForge.getLog().warn("Shutting down async scheduling for migration");
+        CobbledPokeDexForge.getLog().warn("%succeeded% transfers succeeded, %failed% failed, total of %total% entries"
+                .replace("%succeeded%", String.valueOf(currentMigrated))
+                .replace("%failed%", String.valueOf(failed))
+                .replace("%total%", String.valueOf(totalToMigrate))
+        );
+        // Shutdown the executor when done
+        executor.shutdown();
         return true;
     }
 
