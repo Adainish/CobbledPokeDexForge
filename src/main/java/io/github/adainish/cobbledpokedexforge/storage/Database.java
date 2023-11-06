@@ -1,5 +1,7 @@
 package io.github.adainish.cobbledpokedexforge.storage;
 
+import ca.landonjw.gooeylibs2.api.tasks.Task;
+import com.cobblemon.mod.common.api.scheduling.ScheduledTaskTracker;
 import com.google.gson.Gson;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
@@ -161,14 +163,18 @@ public class Database
 
     public boolean migratePlayerData()
     {
-        CobbledPokeDexForge.playerStorage.getAllPlayersFromFiles(true).forEach(player -> {
-            CobbledPokeDexForge.getLog().warn("Now migrating data for: %uuid%".replace("%uuid%", player.uuid.toString()));
-            if (makePlayer(player.uuid)) {
-                CobbledPokeDexForge.getLog().warn("Migrated data for: %uuid%".replace("%uuid%", player.uuid.toString()));
-            } else {
-                CobbledPokeDexForge.getLog().warn("Couldn't make a player entry for %uuid%, did this player already exist in the database?".replace("%uuid%", player.uuid.toString()));
-            }
-        });
+        Task.builder().execute(task -> {
+            CobbledPokeDexForge.playerStorage.getAllPlayersFromFiles(false).forEach(player -> {
+                Task.builder().execute(secondTask -> {
+                    CobbledPokeDexForge.getLog().warn("Now migrating data for: %uuid%".replace("%uuid%", player.uuid.toString()));
+                    if (makePlayer(player.uuid)) {
+                        CobbledPokeDexForge.getLog().warn("Migrated data for: %uuid%".replace("%uuid%", player.uuid.toString()));
+                    } else {
+                        CobbledPokeDexForge.getLog().warn("Couldn't make a player entry for %uuid%, did this player already exist in the database?".replace("%uuid%", player.uuid.toString()));
+                    }
+                }).interval(1).delay(2).iterations(1).build();
+            });
+        }).iterations(1).build();
 
         return true;
     }
