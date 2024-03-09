@@ -24,10 +24,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PokeDex {
@@ -201,8 +198,9 @@ public class PokeDex {
 
     public List<Button> pokemonButtonEntries() {
         List<Button> buttons = new ArrayList<>();
-
-        pokemonData.forEach((integer, dexPokemon) -> {
+        List<DexPokemon> dexPokemons = new ArrayList<>(pokemonData.values());
+        dexPokemons.sort(Comparator.comparing(dexPokemon -> dexPokemon.pokeDexNumber));
+        dexPokemons.forEach(dexPokemon -> {
             Pokemon pokemon = dexPokemon.getPokemon();
             GooeyButton.Builder buttonBuilder = GooeyButton.builder();
             buttonBuilder.display(Util.returnIcon(pokemon));
