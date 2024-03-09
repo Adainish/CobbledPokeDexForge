@@ -320,12 +320,12 @@ public class PokeDex {
                 .onClick(b -> {
                     Player player = CobbledPokeDexForge.playerStorage.getPlayer(b.getPlayer().getUUID());
                     if (player != null) {
-                        Util.send(b.getPlayer(), "&cYou've claimed your rewards!");
+                        Util.send(b.getPlayer().getUUID(), "&cYou've claimed your rewards!");
                         dexPokemon.claimRewards(b.getPlayer());
                         player.pokeDex = this;
                         player.save();
                     } else {
-                        Util.send(b.getPlayer(), "&cSomething went wrong loading your data");
+                        Util.send(b.getPlayer().getUUID(), "&cSomething went wrong loading your data");
                     }
                     UIManager.closeUI(b.getPlayer());
                 })
@@ -373,22 +373,22 @@ public class PokeDex {
                             .lore(Util.formattedArrayList(configurableDexProgression.getGuiLore()))
                             .onClick(b -> {
                                 if (dexProgression.isClaimed()) {
-                                    Util.send(b.getPlayer(), "&cYou've already claimed these rewards");
+                                    Util.send(b.getPlayer().getUUID(), "&cYou've already claimed these rewards");
                                     return;
                                 }
                                 if (!completedPercent(dexProgression)) {
-                                    Util.send(b.getPlayer(), "&cYou've not reached the required amount");
+                                    Util.send(b.getPlayer().getUUID(), "&cYou've not reached the required amount");
                                     return;
                                 }
 
                                 Player player = CobbledPokeDexForge.playerStorage.getPlayer(b.getPlayer().getUUID());
                                 if (player != null) {
-                                    Util.send(b.getPlayer(), "&cYou've claimed your rewards!");
+                                    Util.send(b.getPlayer().getUUID(), "&cYou've claimed your rewards!");
                                     dexProgression.claimRewards(b.getPlayer());
                                     player.pokeDex = this;
                                     player.save();
                                 } else {
-                                    Util.send(b.getPlayer(), "&cSomething went wrong loading your data");
+                                    Util.send(b.getPlayer().getUUID(), "&cSomething went wrong loading your data");
                                 }
                                 UIManager.closeUI(b.getPlayer());
                             })

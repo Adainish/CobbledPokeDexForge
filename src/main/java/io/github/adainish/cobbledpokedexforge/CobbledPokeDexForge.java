@@ -1,5 +1,7 @@
 package io.github.adainish.cobbledpokedexforge;
 
+import com.cobblemon.mod.common.api.Priority;
+import com.cobblemon.mod.common.platform.events.PlatformEvents;
 import io.github.adainish.cobbledpokedexforge.cmd.Command;
 import io.github.adainish.cobbledpokedexforge.config.ConfigurableDexConfig;
 import io.github.adainish.cobbledpokedexforge.config.DBConfig;
@@ -11,29 +13,21 @@ import io.github.adainish.cobbledpokedexforge.storage.Database;
 import io.github.adainish.cobbledpokedexforge.storage.PlayerStorage;
 import io.github.adainish.cobbledpokedexforge.subscriptions.EventSubscriptions;
 import io.github.adainish.cobbledpokedexforge.wrapper.Wrapper;
+import kotlin.Unit;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLConfig;
-import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.server.ServerLifecycleHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 
-@Mod(CobbledPokeDexForge.MODID)
-public class CobbledPokeDexForge {
+
+public class CobbledPokeDexForge implements ModInitializer {
     public static final String MODID = "cobbledpokedexforge";
-    public static final String MOD_NAME = "CobbledPokeDexForge";
-    public static final String VERSION = "1.1.0-Alpha";
+    public static final String MOD_NAME = "CobbledPokeDex";
+    public static final String VERSION = "1.1.0";
     public static final String AUTHORS = "Winglet";
     public static final String YEAR = "2023";
     private static final Logger log = LogManager.getLogger(MOD_NAME);
@@ -53,7 +47,9 @@ public class CobbledPokeDexForge {
     public static DBConfig dbConfig;
     public static Wrapper wrapper;
 
-    public static EventSubscriptions subscriptions;
+    public EventSubscriptions subscriptions;
+
+    public PlayerListener playerListener;
 
     public static Logger getLog() {
         return log;
@@ -62,19 +58,14 @@ public class CobbledPokeDexForge {
     public static PlayerStorage playerStorage;
 
 
-    public CobbledPokeDexForge() {
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        modEventBus.addListener(this::commonSetup);
-        MinecraftForge.EVENT_BUS.register(this);
+    public CobbledPokeDexForge() {}
+
+    @Override
+    public void onInitialize() {
+        this.commonSetup();
     }
 
-    @SubscribeEvent
-    public void onServerShutDown(ServerStoppingEvent event)
-    {
-        this.handleShutDown();
-    }
-
-    private void commonSetup(final FMLCommonSetupEvent event) {
+    private void commonSetup() {
         log.info("Booting up %n by %authors %v %y"
                 .replace("%n", MOD_NAME)
                 .replace("%authors", AUTHORS)
@@ -82,35 +73,40 @@ public class CobbledPokeDexForge {
                 .replace("%y", YEAR)
         );
         this.initDirs();
-    }
 
-    @SubscribeEvent
-    public void onCommandRegistry(RegisterCommandsEvent event) {
-        //register commands
-        event.getDispatcher().register(Command.getCommand());
-    }
-
-    @SubscribeEvent
-    public void onServerStarted(ServerStartedEvent event)
-    {
-        setServer(ServerLifecycleHooks.getCurrentServer());
-        playerStorage = new PlayerStorage();
-        wrapper = new Wrapper();
-        //load configurable dex from config
-        this.initConfigs();
-        if (dbConfig != null)
-        {
-            if (dbConfig.enabled)
+        PlatformEvents.SERVER_STARTED.subscribe(Priority.NORMAL, t -> {
+            setServer(t.getServer());
+            playerStorage = new PlayerStorage();
+            wrapper = new Wrapper();
+            //load configurable dex from config
+            this.initConfigs();
+            if (dbConfig != null)
             {
-                playerStorage.database = new Database();
+                if (dbConfig.enabled)
+                {
+                    playerStorage.database = new Database();
+                }
             }
-        }
-        subscriptions = new EventSubscriptions();
-        MinecraftForge.EVENT_BUS.register(new PlayerListener());
+            subscriptions = new EventSubscriptions();
+            playerListener = new PlayerListener();
+
+            return Unit.INSTANCE;
+        });
+
+        PlatformEvents.SERVER_STOPPING.subscribe(Priority.NORMAL, t -> {
+            this.handleShutDown();
+            return Unit.INSTANCE;
+        });
+
+
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryaccess, environment) -> {
+            dispatcher.register(Command.getCommand());
+        });
     }
+
 
     public void initDirs() {
-        setConfigDir(new File(FMLPaths.GAMEDIR.get().resolve(FMLConfig.defaultConfigPath()) + "/CobbledPokeDex/"));
+        setConfigDir(new File(FabricLoader.getInstance().getConfigDir() + "/CobbledPokeDex/"));
         getConfigDir().mkdir();
         setStorage(new File(getConfigDir(), "/storage/"));
         getStorage().mkdirs();

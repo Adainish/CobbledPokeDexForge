@@ -10,13 +10,14 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.github.adainish.cobbledpokedexforge.CobbledPokeDexForge;
 import io.github.adainish.cobbledpokedexforge.obj.Reward;
 import net.minecraft.commands.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
-import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -185,7 +186,7 @@ public class Util
         getPlayer(uuid).sendSystemMessage(Component.literal(((TextUtil.getMessagePrefix()).getString() + message).replaceAll("&([0-9a-fk-or])", "\u00a7$1")));
     }
 
-    public static void send(CommandSource sender, String message) {
+    public static void send(CommandSourceStack sender, String message) {
         sender.sendSystemMessage(Component.literal(((TextUtil.getMessagePrefix()).getString() + message).replaceAll("&([0-9a-fk-or])", "\u00a7$1")));
     }
 
@@ -229,7 +230,6 @@ public class Util
         }
     }
 
-    @Nullable
     public static Reward getRewardFromString(String id)
     {
         return CobbledPokeDexForge.rewardsConfig.rewardHashMap.get(id);
