@@ -19,7 +19,10 @@ import com.cobblemon.mod.common.api.spawning.detail.PokemonSpawnDetail;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import io.github.adainish.cobbledpokedexforge.CobbledPokeDexForge;
 import io.github.adainish.cobbledpokedexforge.util.Util;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -366,10 +369,17 @@ public class PokeDex {
         CobbledPokeDexForge.dexProgressionConfig.configurableDexProgressions.forEach((s, configurableDexProgression) -> {
             DexProgression dexProgression = dexProgressionList.get(s);
             if (dexProgression != null) {
+                ItemStack itemStack = new ItemStack(Items.PAPER);
+                if (dexProgression.getGuiItem() != null) {
+                    ResourceLocation resourceLocation = new ResourceLocation(dexProgression.getGuiItem());
+                    if (BuiltInRegistries.ITEM.containsKey(resourceLocation))
+                        itemStack = new ItemStack(BuiltInRegistries.ITEM.get(resourceLocation));
+                }
+
                 try {
                     GooeyButton button = GooeyButton.builder()
                             .title(Util.formattedString(configurableDexProgression.getGuiTitle()))
-                            .display(new ItemStack(Items.PAPER))
+                            .display(itemStack)
                             .lore(Util.formattedArrayList(configurableDexProgression.getGuiLore()))
                             .onClick(b -> {
                                 if (dexProgression.isClaimed()) {
