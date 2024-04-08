@@ -35,17 +35,17 @@ public class Command
                             if (CobbledPokeDexForge.dbConfig.enabled) {
                                 if (CobbledPokeDexForge.playerStorage.database != null) {
                                     try {
-                                        Util.send(cc.getSource().source, "&eNow attempting migration... This could be very heavy. Please do not do this with any players online!");
+                                        Util.send(cc.getSource(), "&eNow attempting migration... This could be very heavy. Please do not do this with any players online!");
                                         CobbledPokeDexForge.playerStorage.database.migratePlayerData();
                                     } catch (Exception e) {
                                         e.printStackTrace();
-                                        Util.send(cc.getSource().source, "&cSomething went wrong while migrating, please check your console for errors!");
+                                        Util.send(cc.getSource(), "&cSomething went wrong while migrating, please check your console for errors!");
                                     }
                                 } else {
-                                    Util.send(cc.getSource().source, "&cWe failed to retrieve the database! This isn't good");
+                                    Util.send(cc.getSource(), "&cWe failed to retrieve the database! This isn't good");
                                 }
                             } else {
-                                Util.send(cc.getSource().source, "&cThe database is marked as disabled in the config!");
+                                Util.send(cc.getSource(), "&cThe database is marked as disabled in the config!");
                             }
                             return 1;
                         })
@@ -56,19 +56,19 @@ public class Command
                             if (CobbledPokeDexForge.dbConfig.enabled) {
                                 if (CobbledPokeDexForge.playerStorage.database != null) {
                                     try {
-                                        Util.send(cc.getSource().source, "&eNow attempting full data wipe for pokedex");
+                                        Util.send(cc.getSource(), "&eNow attempting full data wipe for pokedex");
                                         CobbledPokeDexForge.playerStorage.database.collection.drop();
                                         CobbledPokeDexForge.playerStorage.database.database.drop();
 //                                        CobbledPokeDexForge.playerStorage.database.migratePlayerData();
                                     } catch (Exception e) {
                                         e.printStackTrace();
-                                        Util.send(cc.getSource().source, "&cSomething went wrong while migrating, please check your console for errors!");
+                                        Util.send(cc.getSource(), "&cSomething went wrong while migrating, please check your console for errors!");
                                     }
                                 } else {
-                                    Util.send(cc.getSource().source, "&cWe failed to retrieve the database! This isn't good");
+                                    Util.send(cc.getSource(), "&cWe failed to retrieve the database! This isn't good");
                                 }
                             } else {
-                                Util.send(cc.getSource().source, "&cThe database is marked as disabled in the config!");
+                                Util.send(cc.getSource(), "&cThe database is marked as disabled in the config!");
                             }
                             return 1;
                         })

@@ -1,40 +1,43 @@
 package io.github.adainish.cobbledpokedexforge.listener;
 
+import com.cobblemon.mod.common.api.Priority;
+import com.cobblemon.mod.common.platform.events.PlatformEvents;
 import io.github.adainish.cobbledpokedexforge.CobbledPokeDexForge;
 import io.github.adainish.cobbledpokedexforge.obj.Player;
-import io.github.adainish.cobbledpokedexforge.storage.PlayerStorage;
+import kotlin.Unit;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+
 
 public class PlayerListener
 {
-    @SubscribeEvent
-    public void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getEntity() == null) {
-            return;
-        }
 
-        Player player = CobbledPokeDexForge.playerStorage.getPlayer(event.getEntity().getUUID());
-        if (player == null) {
-            CobbledPokeDexForge.playerStorage.makePlayer((ServerPlayer) event.getEntity());
-            player = CobbledPokeDexForge.playerStorage.getPlayer(event.getEntity().getUUID());
-        }
+    public PlayerListener()
+    {
 
-        if (player != null) {
-            player.syncWithConfigurable();
-            player.registerFromStorage();
-            player.updateCache();
-        }
-    }
-
-    @SubscribeEvent
-    public void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        if (event.getEntity() != null) {
-            Player player = CobbledPokeDexForge.playerStorage.getPlayer(event.getEntity().getUUID());
-            if (player != null) {
-                player.save();
+        PlatformEvents.SERVER_PLAYER_LOGIN.subscribe(Priority.NORMAL, event -> {
+            Player player = CobbledPokeDexForge.playerStorage.getPlayer(event.getPlayer().getUUID());
+            if (player == null) {
+                CobbledPokeDexForge.playerStorage.makePlayer(event.getPlayer());
+                player = CobbledPokeDexForge.playerStorage.getPlayer(event.getPlayer().getUUID());
             }
-        }
+
+            if (player != null) {
+                player.syncWithConfigurable();
+                player.registerFromStorage();
+                player.updateCache();
+            }
+            return Unit.INSTANCE;
+        });
+
+        PlatformEvents.SERVER_PLAYER_LOGOUT.subscribe(Priority.NORMAL, event -> {
+            ServerPlayer player = event.getPlayer();
+            if (player != null) {
+                Player p = CobbledPokeDexForge.playerStorage.getPlayer(player.getUUID());
+                if (p != null) {
+                    p.save();
+                }
+            }
+            return Unit.INSTANCE;
+        });
     }
 }

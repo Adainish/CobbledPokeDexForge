@@ -19,7 +19,10 @@ import com.cobblemon.mod.common.api.spawning.detail.PokemonSpawnDetail;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import io.github.adainish.cobbledpokedexforge.CobbledPokeDexForge;
 import io.github.adainish.cobbledpokedexforge.util.Util;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -320,12 +323,12 @@ public class PokeDex {
                 .onClick(b -> {
                     Player player = CobbledPokeDexForge.playerStorage.getPlayer(b.getPlayer().getUUID());
                     if (player != null) {
-                        Util.send(b.getPlayer(), "&cYou've claimed your rewards!");
+                        Util.send(b.getPlayer().getUUID(), "&cYou've claimed your rewards!");
                         dexPokemon.claimRewards(b.getPlayer());
                         player.pokeDex = this;
                         player.save();
                     } else {
-                        Util.send(b.getPlayer(), "&cSomething went wrong loading your data");
+                        Util.send(b.getPlayer().getUUID(), "&cSomething went wrong loading your data");
                     }
                     UIManager.closeUI(b.getPlayer());
                 })
@@ -366,29 +369,36 @@ public class PokeDex {
         CobbledPokeDexForge.dexProgressionConfig.configurableDexProgressions.forEach((s, configurableDexProgression) -> {
             DexProgression dexProgression = dexProgressionList.get(s);
             if (dexProgression != null) {
+                ItemStack itemStack = new ItemStack(Items.PAPER);
+                if (dexProgression.getGuiItem() != null) {
+                    ResourceLocation resourceLocation = new ResourceLocation(dexProgression.getGuiItem());
+                    if (BuiltInRegistries.ITEM.containsKey(resourceLocation))
+                        itemStack = new ItemStack(BuiltInRegistries.ITEM.get(resourceLocation));
+                }
+
                 try {
                     GooeyButton button = GooeyButton.builder()
                             .title(Util.formattedString(configurableDexProgression.getGuiTitle()))
-                            .display(new ItemStack(Items.PAPER))
+                            .display(itemStack)
                             .lore(Util.formattedArrayList(configurableDexProgression.getGuiLore()))
                             .onClick(b -> {
                                 if (dexProgression.isClaimed()) {
-                                    Util.send(b.getPlayer(), "&cYou've already claimed these rewards");
+                                    Util.send(b.getPlayer().getUUID(), "&cYou've already claimed these rewards");
                                     return;
                                 }
                                 if (!completedPercent(dexProgression)) {
-                                    Util.send(b.getPlayer(), "&cYou've not reached the required amount");
+                                    Util.send(b.getPlayer().getUUID(), "&cYou've not reached the required amount");
                                     return;
                                 }
 
                                 Player player = CobbledPokeDexForge.playerStorage.getPlayer(b.getPlayer().getUUID());
                                 if (player != null) {
-                                    Util.send(b.getPlayer(), "&cYou've claimed your rewards!");
+                                    Util.send(b.getPlayer().getUUID(), "&cYou've claimed your rewards!");
                                     dexProgression.claimRewards(b.getPlayer());
                                     player.pokeDex = this;
                                     player.save();
                                 } else {
-                                    Util.send(b.getPlayer(), "&cSomething went wrong loading your data");
+                                    Util.send(b.getPlayer().getUUID(), "&cSomething went wrong loading your data");
                                 }
                                 UIManager.closeUI(b.getPlayer());
                             })
